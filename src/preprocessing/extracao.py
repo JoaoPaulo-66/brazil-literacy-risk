@@ -99,6 +99,51 @@ def extrair_escolas_2023() -> Path:
     print(f"     taxa media de alfabetizacao das escolas: {df['escola_taxa_alfab_2023'].mean():.2%}")
     return salvar(df, "escolas_2023")
 
+# Contexto do municipio no ano anterior (2023), vindo da camada Gold.
+# Uma linha por municipio, com as tres redes lado a lado.
+# O rotulo da rede publica tem acento, entao e filtrado por LIKE com
+# curinga '_' no lugar do 'u' acentuado, para nao digitar acento no codigo.
+SQL_MUNICIPIOS_2023 = """
+    WITH g AS (
+        SELECT
+            id_municipio,
+            CASE
+                WHEN rede = 'Municipal'    THEN 'municipal'
+                WHEN rede = 'Estadual'     THEN 'estadual'
+                WHEN rede LIKE 'P_blica%'  THEN 'publica'
+            END AS rede_curta,
+            CAST(taxa_alfabetizacao AS double)      AS taxa,
+            CAST(media_portugues AS double)         AS media_pt,
+            CAST(percentual_participacao AS double) AS participacao
+        FROM gold_indicador_municipio
+        WHERE CAST(ano AS varchar) = '2023'
+    )
+    SELECT
+        id_municipio,
+        MAX(CASE WHEN rede_curta = 'municipal' THEN taxa END)         AS muni_taxa_municipal_2023,
+        MAX(CASE WHEN rede_curta = 'municipal' THEN media_pt END)     AS muni_media_pt_municipal_2023,
+        MAX(CASE WHEN rede_curta = 'municipal' THEN participacao END) AS muni_participacao_municipal_2023,
+        MAX(CASE WHEN rede_curta = 'estadual'  THEN taxa END)         AS muni_taxa_estadual_2023,
+        MAX(CASE WHEN rede_curta = 'estadual'  THEN media_pt END)     AS muni_media_pt_estadual_2023,
+        MAX(CASE WHEN rede_curta = 'estadual'  THEN participacao END) AS muni_participacao_estadual_2023,
+        MAX(CASE WHEN rede_curta = 'publica'   THEN taxa END)         AS muni_taxa_publica_2023,
+        MAX(CASE WHEN rede_curta = 'publica'   THEN media_pt END)     AS muni_media_pt_publica_2023,
+        MAX(CASE WHEN rede_curta = 'publica'   THEN participacao END) AS muni_participacao_publica_2023
+    FROM g
+    GROUP BY id_municipio
+"""
+
+
+def extrair_municipios_2023() -> Path:
+    df = consultar(SQL_MUNICIPIOS_2023)
+    assert df["id_municipio"].is_unique, "id_municipio duplicado na base de municipios"
+    cobertura = df.filter(like="muni_taxa_").notna().sum()
+    print("     municipios com taxa por rede:")
+    for coluna, n in cobertura.items():
+        print(f"       {coluna}: {n:,}")
+    return salvar(df, "municipios_2023")
+
 if __name__ == "__main__":
     extrair_alunos_2024()
     extrair_escolas_2023()
+    extrair_municipios_2023()

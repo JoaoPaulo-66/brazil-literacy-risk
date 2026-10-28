@@ -61,43 +61,28 @@ def extrair_alunos_2024() -> Path:
     print(f"     proporcao de alfabetizados: {df['alfabetizado'].mean():.2%}")
     return salvar(df, "alunos_2024")
 
-# Contexto da escola no ano anterior (2023).
-# Sem leakage: o indicador avalia o 2o ano, entao os alunos de 2023
-# sao outra turma. Nenhum aluno de 2024 esta contido nesses agregados.
-SQL_ESCOLAS_2023 = """
-    WITH base AS (
-        SELECT
-            id_escola,
-            CAST(presenca AS varchar) = '1'
-                AND CAST(preenchimento_caderno AS varchar) = '1' AS fez_prova,
-            CAST(alfabetizado AS double) AS alfab,
-            CAST(proficiencia AS double) AS prof,
-            CAST(peso_aluno AS double)   AS peso
-        FROM silver_alunos
-        WHERE CAST(ano AS varchar) = '2023'
-    )
+# Porte da escola no proprio ano de 2024.
+# O id_escola e remascarado a cada ano (validado na EDA: so 2,4% dos IDs
+# repetidos ficam no mesmo municipio), entao nao ha historico por escola.
+# O porte e conhecido antes da prova, por isso nao vaza.
+# Chave composta (escola + municipio) por seguranca contra colisao de IDs.
+SQL_ESCOLAS_2024 = """
     SELECT
-        id_escola,
-        COUNT(*) AS escola_alunos_2023,
-        SUM(CASE WHEN fez_prova THEN 1 ELSE 0 END) AS escola_avaliados_2023,
-        CAST(SUM(CASE WHEN fez_prova THEN 1 ELSE 0 END) AS double) / COUNT(*)
-            AS escola_taxa_participacao_2023,
-        SUM(CASE WHEN fez_prova THEN alfab * peso END)
-            / NULLIF(SUM(CASE WHEN fez_prova THEN peso END), 0)
-            AS escola_taxa_alfab_2023,
-        SUM(CASE WHEN fez_prova THEN prof * peso END)
-            / NULLIF(SUM(CASE WHEN fez_prova THEN peso END), 0)
-            AS escola_prof_media_2023
-    FROM base
-    GROUP BY id_escola
+        CAST(id_escola AS varchar)    AS id_escola,
+        CAST(id_municipio AS varchar) AS id_municipio,
+        COUNT(*)                      AS escola_alunos_2024
+    FROM silver_alunos
+    WHERE CAST(ano AS varchar) = '2024'
+      AND rede IN ('Estadual', 'Municipal')
+    GROUP BY 1, 2
 """
 
 
-def extrair_escolas_2023() -> Path:
-    df = consultar(SQL_ESCOLAS_2023)
-    assert df["id_escola"].is_unique, "id_escola duplicado na base de escolas"
-    print(f"     taxa media de alfabetizacao das escolas: {df['escola_taxa_alfab_2023'].mean():.2%}")
-    return salvar(df, "escolas_2023")
+def extrair_escolas_2024() -> Path:
+    df = consultar(SQL_ESCOLAS_2024)
+    assert not df.duplicated(["id_escola", "id_municipio"]).any(), "chave duplicada"
+    print(f"     escolas: {len(df):,} | mediana de alunos: {df['escola_alunos_2024'].median():.0f}")
+    return salvar(df, "escolas_2024")
 
 # Contexto do municipio no ano anterior (2023), vindo da camada Gold.
 # Uma linha por municipio, com as tres redes lado a lado.
@@ -145,5 +130,5 @@ def extrair_municipios_2023() -> Path:
 
 if __name__ == "__main__":
     extrair_alunos_2024()
-    extrair_escolas_2023()
+    extrair_escolas_2024()
     extrair_municipios_2023()

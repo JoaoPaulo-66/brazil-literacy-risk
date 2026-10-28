@@ -1,0 +1,24 @@
+# Ambiente Python
+venv/
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dados (grandes, ficam no S3 e sao baixados pelo pipeline)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Modelos treinados (regerados pelo pipeline)
+models/
+
+# Credenciais e configs locais
+.env
+.aws/
+
+# Editor e sistema
+.vscode/
+Thumbs.db

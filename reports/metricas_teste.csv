@@ -1,0 +1,6 @@
+,valor
+roc_auc,0.643
+corte,0.596
+recall_nao_alfab,0.697
+precisao_nao_alfab,0.481
+recall_alfab,0.494

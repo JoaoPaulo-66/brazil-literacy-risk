@@ -44,9 +44,10 @@ def criar_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def separar_xy(df: pd.DataFrame):
-    """Devolve X (features), y (target) e w (peso amostral)."""
+    """Devolve X (features), y (target), w (peso) e g (municipio, para o split por grupos)."""
     df = criar_features(df)
     X = df[FEATURES_CATEGORICAS + FEATURES_NUMERICAS]
     y = df[TARGET].astype(int)
     w = df[PESO]
-    return X, y, w
+    g = df["id_municipio"]
+    return X, y, w, g

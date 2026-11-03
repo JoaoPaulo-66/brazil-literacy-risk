@@ -19,6 +19,7 @@ def salvar_figura(fig: plt.Figure, nome: str) -> Path:
     print(f"[OK] figura salva em images/{nome}.png")
     return caminho
 
+
 def curva_por_decis(df, coluna, target="alfabetizado", ax=None, q=10, log_x=False):
     """Taxa media do target por decil de uma feature numerica."""
     faixas = pd.qcut(df[coluna], q=q, duplicates="drop")

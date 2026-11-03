@@ -128,6 +128,7 @@ def extrair_municipios_2023() -> Path:
         print(f"       {coluna}: {n:,}")
     return salvar(df, "municipios_2023")
 
+
 # Metas do Compromisso por municipio (so rede Municipal), 2024 a 2030.
 # So 2024 tem resultado; as demais servem para projetar.
 SQL_METAS = """
@@ -147,6 +148,7 @@ def extrair_metas() -> Path:
     assert not df.duplicated(["id_municipio", "ano"]).any(), "municipio/ano duplicado"
     print(df.groupby("ano")[["meta", "resultado"]].count())
     return salvar(df, "metas_municipais")
+
 
 if __name__ == "__main__":
     extrair_alunos_2024()

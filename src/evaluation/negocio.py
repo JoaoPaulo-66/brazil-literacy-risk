@@ -53,6 +53,7 @@ def agrupar_municipios(df, colunas, k=4):
     return KMeans(n_clusters=k, n_init=10, random_state=SEMENTE).fit_predict(
         StandardScaler().fit_transform(Z))
 
+
 def taxa_municipal_prevista(modelo, X, w, g):
     """Taxa prevista da rede municipal de cada municipio (ponderada pelo peso)."""
     m = (X["rede"] == "Municipal").to_numpy()

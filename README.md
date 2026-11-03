@@ -91,10 +91,12 @@ A EDA orientou diretamente as decisões de modelagem:
 | Evidência | Decisão |
 |---|---|
 | `images/leakage_presenca.png`: a ausência na prova vira target 0 | Só alunos que fizeram a prova; `presenca` não é feature |
-| `images/eda_02_escola_2023_vs_aluno_2024.png`: o `id_escola` é remascarado a cada ano | Histórico por escola descartado; da escola fica só o porte em 2024 |
-| `images/eda_03_efeito_porte_escola.png` | Porte da escola entra como feature |
-| `images/eda_04_municipio_2023_vs_aluno_2024.png`: taxa municipal de 2023 próxima da diagonal | Contexto municipal do ano anterior é a principal feature |
-| `images/eda_05_correlacao_features.png` | Features municipais redundantes (correlação acima de 0,9) removidas |
+| `serie` constante e `caderno` sem efeito real (58,7% a 60,5% entre os 21 cadernos) | As duas variáveis removidas |
+| `images/eda_02_escola_2023_vs_aluno_2024.png`: a taxa da escola em 2023 quase não prevê o aluno de 2024 (correlação 0,099) | Investigar o `id_escola` |
+| `images/eda_03_efeito_porte_escola.png`: a curva continua achatada mesmo em escolas grandes, e só 2,4% dos IDs repetidos ficam no mesmo município | O `id_escola` é remascarado a cada ano: histórico por escola descartado; da escola fica só o porte em 2024 |
+| Porte da escola: U invertido suave (57,7% a 61,1% entre os decis) | Porte mantido, com expectativa de baixa importância |
+| `images/eda_04_municipio_2023_vs_aluno_2024.png`: a taxa do município em 2023 acompanha a diagonal (de 40% a 82% entre os decis) | O contexto municipal do ano anterior vira a principal feature |
+| `images/eda_05_correlacao_features.png`: taxa e média de português da mesma rede com correlação de 0,93 a 0,98 | Das 8 features municipais, ficam 2 (`muni_taxa_mesma_rede_2023` e `muni_participacao_municipal_2023`) |
 | `images/eda_06_ibge_curvas_decis.png`: correlação linear quase nula, mas curvas por decil entre 53% e 66% | As 6 features do IBGE ficam (sinal não linear) |
 | `images/eda_07_correlacao_features.png`: maior correlação de Spearman 0,86 | Sem redundância pelo mesmo critério de 0,9 |
 

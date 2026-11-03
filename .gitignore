@@ -23,5 +23,3 @@ models/
 .vscode/
 Thumbs.db
 
-# Jupyter
-.ipynb_checkpoints/
